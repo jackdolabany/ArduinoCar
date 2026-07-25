@@ -165,19 +165,26 @@ int letterIndex = 0;
 
 int fadeOffset = 0; // 1-12 as we fade from one letter to the next
 
+int AIN1 = 7;
+int AIN2 = 8;
+int PWMA = 9;
+
 void setup() {
   // put your setup code here, to run once:
   matrix.begin();
 
   //mergeFrames(O, T, buffer, 8, 12, 6);
   //matrix.renderBitmap(*letters[0], 8, 12);
+
+
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(PWMA, OUTPUT);
+
 }
 
-
-void loop() {
-  
-  delay(25);
-  
+void shiftAndWriteLettersToLED()
+{
   fadeOffset++;
 
   if (fadeOffset >= letterWidth + spaceBetweenLetters)
@@ -192,19 +199,38 @@ void loop() {
     }
   }
 
- int nextLetter = letterIndex + 1;
- if (nextLetter >= letterCount)
- {
-  nextLetter = 0;
- }
+  int nextLetter = letterIndex + 1;
+  if (nextLetter >= letterCount)
+  {
+    nextLetter = 0;
+  }
 
   //mergeFrames(*letters[letterIndex], *letters[nextLetter], buffer, 8, 12, letterWidth, letterWidth, spaceBetweenLetters, fadeOffset);
   
   shiftLeft(buffer, 8, 12);
   WriteToRightSideBuffer(*letters[letterIndex], buffer, 8, 12, letterWidth, letterWidth, spaceBetweenLetters, fadeOffset);
   matrix.renderBitmap(buffer, 8, 12);
+}
+
+void loop() {
   
-  //shiftLeft(frame, 8, 12);
-  //matrix.renderBitmap(buffer, 8, 12);
+  // forward for 1 second
+  digitalWrite(AIN1, HIGH);
+  digitalWrite(AIN2, LOW);
+  analogWrite(PWMA, 200);
+
+
+  shiftAndWriteLettersToLED();
+
+  delay(500);
+
+  // backward for 1 second
+  digitalWrite(AIN1, LOW);
+  digitalWrite(AIN2, HIGH);
+  analogWrite(PWMA, 200);
+
+  shiftAndWriteLettersToLED();
+
+  delay(500);
  
 }
